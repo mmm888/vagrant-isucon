@@ -30,7 +30,7 @@ Vagrant.configure("2") do |config|
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
   # config.vm.network "private_network", ip: "192.168.33.10"
-  config.vm.network "private_network", type: "dhcp"
+  #config.vm.network "public_network"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
@@ -57,9 +57,9 @@ Vagrant.configure("2") do |config|
   #
   # View the documentation for the provider you are using for more
   # information on available options.
-  config.vm.provider "virtualbox" do |vb|
-    vb.memory = "2048"
-  end
+#  config.vm.provider "virtualbox" do |vb|
+#    vb.memory = "2048"
+#  end
 
   # Define a Vagrant Push strategy for pushing to Atlas. Other push strategies
   # such as FTP and Heroku are also available. See the documentation at
@@ -77,11 +77,15 @@ Vagrant.configure("2") do |config|
   # SHELL
 
   config.vm.define "bench" do |web|
+    web.vm.network "public_network", ip: "192.168.39.85", bridge: "enp0s8"
+    config.vm.provider "virtualbox" do |vb|
+      vb.memory = "2048"
+    end
     config.vm.provision "shell", inline: <<-SHELL
       set -e
       export DEBIAN_FRONTEND=noninteractive
       apt-get update
-      apt-get install -y --no-install-recommends ansible git aptitude golang-go
+      apt-get install -y --no-install-recommends ansible git aptitude golang-go make
       export GOPATH=/tmp/go
       mkdir -p ${GOPATH}/src/github.com/isucon/
       cd ${GOPATH}/src/github.com/isucon
@@ -102,16 +106,21 @@ Vagrant.configure("2") do |config|
       rm -rf ${GOPATH}
 
       usermod -G sudo -a -s /bin/bash isucon
+      echo isucon:isucon | /usr/sbin/chpasswd
 
       echo "Provisioning Successful for image"
     SHELL
   end
   config.vm.define "image" do |web|
+    web.vm.network "public_network", ip: "192.168.39.86", bridge: "enp0s8"
+    config.vm.provider "virtualbox" do |vb|
+      vb.memory = "4096"
+    end
     config.vm.provision "shell", inline: <<-SHELL
       set -e
       export DEBIAN_FRONTEND=noninteractive
       apt-get update
-      apt-get install -y --no-install-recommends ansible git aptitude golang-go tzdata
+      apt-get install -y --no-install-recommends ansible git aptitude golang-go tzdata make
       rm -rf isucon6-qualify
       git clone https://github.com/isucon/isucon6-qualify.git
       sed -i -e 's:--disable-phar::' isucon6-qualify/provisioning/image/ansible/02_xbuild.yml
@@ -131,6 +140,7 @@ Vagrant.configure("2") do |config|
       rm -rf isucon6-qualify
 
       usermod -G sudo -a -s /bin/bash isucon
+      echo isucon:isucon | /usr/sbin/chpasswd
 
       echo "Provisioning Successful for image"
     SHELL
