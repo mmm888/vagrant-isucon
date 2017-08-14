@@ -1,5 +1,11 @@
 # vagrant-isucon/isucon4-qualifier
 
+## Bench
+
+~~~
+./benchmarker bench --host=localhost:80
+~~~
+
 ## Overview
 
 isucon4予選とほぼ同じ環境を構築するためのVagrantfileです。
