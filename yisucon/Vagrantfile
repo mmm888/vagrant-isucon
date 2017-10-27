@@ -1,0 +1,85 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+image_ip = "192.168.39.175"
+bench_ip = "192.168.39.176"
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "bento/centos-7.2"
+  #config.vm.box = "centos/7"
+  config.vm.provider "virtualbox" do |vb|
+    vb.cpus = "2"
+    vb.memory = "2048"
+  end
+  
+  config.vm.provision :shell, inline: <<-SHELL
+    set -e
+    yum install -y gcc git
+    test -e yisucon || git clone https://github.com/yahoojapan/yisucon.git
+  SHELL
+
+### image
+  config.vm.define :image do |web|
+    #web.vm.provider :virtualbox do |vb|
+    #  vb.memory = "1024"
+    #end
+    web.vm.network "public_network", ip: image_ip, bridge: "eno1", netmask: "255.255.0.0"
+    web.vm.provision :shell, inline: <<-SHELL
+      set -e
+      (
+        cd yisucon/provisioning
+        git pull
+        ./provision.sh development isucon
+      )
+      rm -rf yisucon
+    SHELL
+  end
+
+### bench
+  config.vm.define :bench do |bench|
+    #bench.vm.provider :virtualbox do |vb|
+    #  vb.memory = "1024"
+    #end
+    bench.vm.network "public_network", ip: bench_ip, bridge: "eno1", netmask: "255.255.0.0"
+    bench.vm.provision :shell, inline: <<-SHELL
+      set -e
+      export PATH="/usr/local/bin:$PATH"
+      yum install -y mariadb-server
+      systemctl start mariadb
+      systemctl enable mariadb
+      (
+        cd yisucon/provisioning
+        git pull
+
+        cat ../benchmarker/init.sql | sed -e "s/DATETIME/TIMESTAMP/" | mysql -u root
+
+        sed -i \
+          -e "/start_date/s@CHANGE HERE@1970/01/01 00:00:00@" \
+          -e "/end_date/s@CHANGE HERE@2038/01/19 03:14:07@" \
+          -e "/portal_host/s@CHANGE HERE@127.0.0.1@" \
+          -e "/db_host/s@CHANGE HERE@127.0.0.1@" \
+          -e "/db_user/s@CHANGE HERE@root@" \
+          -e "/db_pass/s@CHANGE HERE@@" \
+          environments/production.json
+
+        sed -i \
+          -e "s@sudo @sudo env PATH=\"$PATH\" @" \
+          -e "/npm install/a yarn install" \
+          -e "s/npm install$/npm install -g yarn/" \
+          -e "s/build:prod:ngc/build/" \
+          -e "s@/etc/environment@/etc/portal_environment@" \
+          cookbooks/portal/recipes/default.rb
+
+        ./provision.sh production portal 
+
+        sed -i \
+          -e "/\\[Unit\\]/a Wants=portal.service" \
+          -e "s@/etc/environment@/etc/benchmark_environment@" \
+          cookbooks/benchmarker/recipes/default.rb
+
+        ./provision.sh production benchmarker
+      )
+      rm -rf yisucon
+    SHELL
+  end
+end
