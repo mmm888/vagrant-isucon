@@ -1,8 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-image_ip = "192.168.39.173"
-bench_ip = "192.168.39.174"
+image_ip = "192.168.39.176"
+bench_ip = "192.168.39.177"
 
 box = "bento/debian-8.4"
 

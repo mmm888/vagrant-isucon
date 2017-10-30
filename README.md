@@ -1,34 +1,51 @@
 # vagrant-isucon
 
-## Overview
+## REGULATION
 
-[ISUCON](http://isucon.net/)の過去問を構築するためのVagrantfileです。
+* isucon4q
+  * https://gist.github.com/mirakui/e394ed543415852d34a6
+  * bench
+   * cd /home/isucon/
+   * ./benchmarker bench --host 192.168.39.154 --workload 2
 
-- ISUCON1
-- [ISUCON2](https://github.com/matsuu/vagrant-isucon/tree/master/isucon2)
-- [ISUCON3予選](https://github.com/matsuu/vagrant-isucon/tree/master/isucon3-qualifier)
-- ISUCON3決勝
-- [ISUCON4予選](https://github.com/matsuu/vagrant-isucon/tree/master/isucon4-qualifier)
-- ISUCON4決勝
-- [ISUCON5予選 2台構成](https://github.com/matsuu/vagrant-isucon/tree/master/isucon5-qualifier)
-- [ISUCON5予選 1台構成](https://github.com/matsuu/vagrant-isucon/tree/master/isucon5-qualifier-standalone)
-- [ISUCON5決勝](https://github.com/matsuu/vagrant-isucon/tree/master/isucon5-final)
-- [ISUCON6予選 2台構成](https://github.com/matsuu/vagrant-isucon/tree/master/isucon6-qualifier)
-- [ISUCON6予選 1台構成](https://github.com/matsuu/vagrant-isucon/tree/master/isucon6-qualifier-standalone)
-- ISUCON6決勝
+* isucon5q
+  * https://gist.github.com/tagomoris/1a2df5ab0999f5e64cff
+  * bench
+   * cd /home/isucon/
+   + ./bench.sh (bench.sh 内の TARGET_IP を変更)
 
-サーバ内の構築にはAnsibleを使っています。Ansibleのplaybookのみ必要な場合は[matsuu/ansible-isucon](https://github.com/matsuu/ansible-isucon)をどうぞ。
+* isucon6q
+  * https://github.com/isucon/isucon6-qualify/blob/master/Regulation.md
+  * https://gist.github.com/fujiwara/cb69b456c4556ddbe24f65ec86419959
+  * bench
+   * cd /home/isucon/isucon6q/
+   * ./isucon6q-bench -target http://192.168.39.156
+
+* isucon6f
+  * https://github.com/isucon/isucon6-final/blob/master/regulation.md
+  * bench
+   * docker build . -t bench
+   * docker run bench
+
+* pixiv isucon
+  * https://github.com/catatsuy/private-isu/blob/master/public_manual.md
+  * bench
+   * /opt/go/bin/benchmarker -t http://192.168.39.176/ -u /opt/go/src/github.com/catatsuy/private-isu/benchmarker/userdata
+
+## TODO
+
+* isucon3q
+  * vagrant up が failed する
+
+* isucon4q (centos)
+  * vagrant up が failed する
+
+* isucon5f
+  * vagrant up が failed する
+
+* yisucon
+  * public network の IP が設定されない
 
 ## License
 
 MIT
-
-## TODO
-
-- ISUCON1のVagrantfileを作る
-- ~~ISUCON2のVagrantfileを作る~~
-- ISUCON3決勝のVagrantfileを作る
-- ISUCON4決勝のVagrantfileを作る
-- ISUCON6決勝のVagrantfileを作る
-- Vagrant boxを作成して配布する
-- 英語化
